@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/modules/indexer/code/bleve"
 	"code.gitea.io/gitea/modules/indexer/code/elasticsearch"
 	"code.gitea.io/gitea/modules/indexer/code/internal"
+	"code.gitea.io/gitea/modules/indexer/code/meilisearch"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/process"
 	"code.gitea.io/gitea/modules/queue"
@@ -144,9 +145,9 @@ func Init() {
 		pprof.SetGoroutineLabels(ctx)
 		start := time.Now()
 		var (
-			rIndexer internal.Indexer
-			existed  bool
-			err      error
+			repoIndexer internal.Indexer
+			existed     bool
+			err         error
 		)
 		switch setting.Indexer.RepoType {
 		case "bleve":
@@ -159,8 +160,8 @@ func Init() {
 				}
 			}()
 
-			rIndexer = bleve.NewIndexer(setting.Indexer.RepoPath)
-			existed, err = rIndexer.Init(ctx)
+			repoIndexer = bleve.NewIndexer(setting.Indexer.RepoPath)
+			existed, err = repoIndexer.Init(ctx)
 			if err != nil {
 				cancel()
 				(*globalIndexer.Load()).Close()
@@ -177,26 +178,36 @@ func Init() {
 				}
 			}()
 
-			rIndexer = elasticsearch.NewIndexer(setting.Indexer.RepoConnStr, setting.Indexer.RepoIndexerName)
+			repoIndexer = elasticsearch.NewIndexer(setting.Indexer.RepoConnStr, setting.Indexer.RepoIndexerName)
 			if err != nil {
 				cancel()
 				(*globalIndexer.Load()).Close()
 				close(waitChannel)
 				log.Fatal("PID: %d Unable to create the elasticsearch Repository Indexer connstr: %s Error: %v", os.Getpid(), setting.Indexer.RepoConnStr, err)
 			}
-			existed, err = rIndexer.Init(ctx)
+			existed, err = repoIndexer.Init(ctx)
 			if err != nil {
 				cancel()
 				(*globalIndexer.Load()).Close()
 				close(waitChannel)
 				log.Fatal("PID: %d Unable to initialize the elasticsearch Repository Indexer connstr: %s Error: %v", os.Getpid(), setting.Indexer.RepoConnStr, err)
 			}
+		case "meilisearch":
+			log.Info("PID: %d Initializing Repository Indexer at: %s", os.Getpid(), setting.Indexer.RepoConnStr)
+			repoIndexer = meilisearch.NewIndexer(setting.Indexer.RepoConnStr, setting.Indexer.RepoConnAuth, setting.Indexer.RepoIndexerName)
+			existed, err = repoIndexer.Init(ctx)
+			if err != nil {
+				cancel()
+				(*globalIndexer.Load()).Close()
+				close(waitChannel)
+				log.Fatal("PID: %d Unable to initialize the meilisearch Repository Indexer connstr: %s Error: %v", os.Getpid(), setting.Indexer.RepoConnStr, err)
+			}
 
 		default:
 			log.Fatal("PID: %d Unknown Indexer type: %s", os.Getpid(), setting.Indexer.RepoType)
 		}
 
-		globalIndexer.Store(&rIndexer)
+		globalIndexer.Store(&repoIndexer)
 
 		// Start processing the queue
 		go graceful.GetManager().RunWithCancel(indexerQueue)
