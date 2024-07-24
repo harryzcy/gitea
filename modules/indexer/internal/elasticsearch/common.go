@@ -5,6 +5,7 @@ package elasticsearch
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -26,6 +27,7 @@ func DetectVersion(url string) (int, error) {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
+	fmt.Println("url", url)
 	resp, err := client.Get(url)
 	if err != nil {
 		return 0, err

@@ -4,6 +4,8 @@
 package elasticsearch
 
 import (
+	"fmt"
+
 	inner_elasticsearch "code.gitea.io/gitea/modules/indexer/internal/elasticsearch"
 	"code.gitea.io/gitea/modules/indexer/issues/internal"
 )
@@ -12,6 +14,7 @@ import (
 func NewIndexer(url, indexerName string) (internal.Indexer, error) {
 	version, err := inner_elasticsearch.DetectVersion(url)
 	if err != nil {
+		fmt.Println(15, err)
 		return nil, err
 	}
 
