@@ -5,7 +5,6 @@ package code
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
@@ -127,14 +126,13 @@ func TestESIndexAndSearch(t *testing.T) {
 
 	indexer, err := elasticsearch.NewIndexer(u, "gitea_codes")
 	if err != nil {
-		assert.Error(t, fmt.Errorf("unable to create ES indexer Error: %v", err))
-		return
+		t.Errorf("Unable to create ES indexer Error: %v", err)
 	}
 	if _, err := indexer.Init(context.Background()); err != nil {
 		if indexer != nil {
 			indexer.Close()
 		}
-		assert.Error(t, fmt.Errorf("unable to create ES indexer Error: %v", err))
+		t.Errorf("Unable to create ES indexer Error: %v", err)
 	}
 
 	defer indexer.Close()
