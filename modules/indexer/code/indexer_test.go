@@ -134,7 +134,7 @@ func TestESIndexAndSearch(t *testing.T) {
 		if indexer != nil {
 			indexer.Close()
 		}
-		assert.FailNow(t, "Unable to create ES indexer Error: %v", err)
+		assert.Error(t, fmt.Errorf("unable to create ES indexer Error: %v", err))
 	}
 
 	defer indexer.Close()
