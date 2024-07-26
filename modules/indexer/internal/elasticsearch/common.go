@@ -38,6 +38,7 @@ func DetectVersion(connStr string) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to create request: %v", err)
 	}
+	req.Close = true
 	pass, ok := u.User.Password()
 	if ok {
 		fmt.Println("pass", pass)
