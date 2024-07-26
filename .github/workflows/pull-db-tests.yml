@@ -169,7 +169,7 @@ jobs:
         ports:
           - "3306:3306"
       elasticsearch:
-        image: elasticsearch:8.14.0
+        image: elasticsearch:8.14.3
         env:
           discovery.type: single-node
           ELASTIC_PASSWORD: changeme
