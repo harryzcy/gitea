@@ -183,8 +183,8 @@ jobs:
           - "587:587"
           - "993:993"
     steps:
-      - name: curl
-        run: curl -XGET -k -u elastic:changeme https://localhost:9200
+      # - name: curl
+      #   run: curl -XGET -k -u elastic:changeme https://localhost:9200
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
@@ -204,7 +204,7 @@ jobs:
           TAGS: bindata
           RACE_ENABLED: true
           USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@elasticsearch:9200"
+          TEST_INDEXER_CODE_ES_URL: "https://elastic:changeme@elasticsearch:9200"
       - name: run tests
         run: make integration-test-coverage
         env:
