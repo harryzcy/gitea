@@ -39,7 +39,7 @@ jobs:
         ports:
           - "9000:9000"
       elasticsearch:
-        image: elasticsearch:8.14.0
+        image: elasticsearch:8.14.3
         env:
           discovery.type: single-node
           xpack.security.enabled: false
@@ -52,18 +52,11 @@ jobs:
           go-version-file: go.mod
           check-latest: true
       - name: Add hosts to /etc/hosts
-        run: '[ -e "/.dockerenv" ] || [ -e "/run/.containerenv" ] || echo "127.0.0.1 pgsql ldap minio" | sudo tee -a /etc/hosts'
+        run: '[ -e "/.dockerenv" ] || [ -e "/run/.containerenv" ] || echo "127.0.0.1 pgsql ldap minio elasticsearch" | sudo tee -a /etc/hosts'
       - run: make deps-backend
       - run: make backend
         env:
           TAGS: bindata
-      - name: TestESIndexAndSearch
-        run: go test -timeout 30s -tags gogit,sqlite,sqlite_unlock_notify -run ^TestESIndexAndSearch$ code.gitea.io/gitea/modules/indexer/code
-        env:
-          TAGS: bindata
-          RACE_ENABLED: true
-          USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@localhost:9200"
       - name: run migration tests
         run: make test-pgsql-migration
       - name: run tests
@@ -75,7 +68,7 @@ jobs:
           TEST_TAGS: gogit
           TEST_LDAP: 1
           USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@localhost:9200"
+          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@elasticsearch:9200"
 
   test-sqlite:
     if: needs.files-changed.outputs.backend == 'true' || needs.files-changed.outputs.actions == 'true'
@@ -180,8 +173,8 @@ jobs:
         image: elasticsearch:8.14.3
         env:
           discovery.type: single-node
-          # xpack.security.enabled: false
-          ELASTIC_PASSWORD: changeme
+          xpack.security.enabled: false
+          # ELASTIC_PASSWORD: changeme # TODO: test with tls and auth enabled
         ports:
           - "9200:9200"
       smtpimap:
@@ -205,22 +198,15 @@ jobs:
       - run: make backend
         env:
           TAGS: bindata
-      # - name: run migration tests
-      #   run: make test-mysql-migration
-      - name: TestESIndexAndSearch
-        run: go test -timeout 30s -tags gogit,sqlite,sqlite_unlock_notify -run ^TestESIndexAndSearch$ code.gitea.io/gitea/modules/indexer/code
-        env:
-          TAGS: bindata
-          RACE_ENABLED: true
-          USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "https://elastic:changeme@localhost:9200"
+      - name: run migration tests
+        run: make test-mysql-migration
       - name: run tests
         run: make integration-test-coverage
         env:
           TAGS: bindata
           RACE_ENABLED: true
           USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "https://elastic:changeme@localhost:9200"
+          TEST_INDEXER_CODE_ES_URL: "https://elastic:changeme@elasticsearch:9200"
 
   test-mssql:
     if: needs.files-changed.outputs.backend == 'true' || needs.files-changed.outputs.actions == 'true'
