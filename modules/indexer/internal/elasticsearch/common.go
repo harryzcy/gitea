@@ -58,11 +58,13 @@ func parseElasticVersion(body io.Reader) (int, error) {
 		fmt.Println("failed to decode json", err)
 		return 0, err
 	}
+	fmt.Println("parseElasticVersion", 61)
 
 	majorStr, _, ok := strings.Cut(root.Version.Number, ".")
 	if !ok {
 		return 0, errors.New("invalid version number")
 	}
+	fmt.Println("majorStr", majorStr)
 
 	if majorStr == "8" {
 		return 8, nil
