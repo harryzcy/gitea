@@ -184,7 +184,7 @@ jobs:
           - "993:993"
     steps:
       - name: curl
-        run: curl -XGET -k -u elastic:changeme http://localhost:9200
+        run: curl -XGET -k -u elastic:changeme https://localhost:9200
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
