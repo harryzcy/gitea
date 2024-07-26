@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -23,12 +24,26 @@ type elasticRootResponse struct {
 
 // DetectVersion detects the major version of the elasticsearch server.
 // Currently only supports version 7 and 8.
-func DetectVersion(url string) (int, error) {
+func DetectVersion(connStr string) (int, error) {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
-	fmt.Println("url", url)
-	resp, err := client.Get(url)
+	fmt.Println("connStr", connStr)
+	u, err := url.Parse(connStr)
+	if err != nil {
+		return 0, err
+	}
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return 0, err
+	}
+	pass, ok := u.User.Password()
+	if ok {
+		req.SetBasicAuth(u.User.Username(), pass)
+	}
+
+	resp, err := client.Get(connStr)
 	if err != nil {
 		return 0, err
 	}
