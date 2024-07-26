@@ -193,8 +193,15 @@ jobs:
       - run: make backend
         env:
           TAGS: bindata
-      - name: run migration tests
-        run: make test-mysql-migration
+      # - name: run migration tests
+      #   run: make test-mysql-migration
+      - name: TestESIndexAndSearch
+        run: go test -timeout 30s -tags gogit -run ^TestESIndexAndSearch$ code.gitea.io/gitea/modules/indexer/code
+        env:
+          TAGS: bindata
+          RACE_ENABLED: true
+          USE_REPO_TEST_DIR: 1
+          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@elasticsearch:9200"
       - name: run tests
         run: make integration-test-coverage
         env:

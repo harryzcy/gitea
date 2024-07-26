@@ -39,6 +39,7 @@ func DetectVersion(url string) (int, error) {
 func parseElasticVersion(body io.Reader) (int, error) {
 	var root elasticRootResponse
 	if err := json.NewDecoder(body).Decode(&root); err != nil {
+		fmt.Println("failed to decode json", err)
 		return 0, err
 	}
 
