@@ -57,6 +57,13 @@ jobs:
       - run: make backend
         env:
           TAGS: bindata
+      - name: TestESIndexAndSearch
+        run: go test -timeout 30s -tags gogit,sqlite,sqlite_unlock_notify -run ^TestESIndexAndSearch$ code.gitea.io/gitea/modules/indexer/code
+        env:
+          TAGS: bindata
+          RACE_ENABLED: true
+          USE_REPO_TEST_DIR: 1
+          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@elasticsearch:9200"
       - name: run migration tests
         run: make test-pgsql-migration
       - name: run tests

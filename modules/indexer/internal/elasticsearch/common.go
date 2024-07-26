@@ -28,7 +28,6 @@ func DetectVersion(connStr string) (int, error) {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
-	fmt.Println("connStr", connStr)
 	u, err := url.Parse(connStr)
 	if err != nil {
 		return 0, fmt.Errorf("failed to parse url: %v", err)
@@ -38,10 +37,8 @@ func DetectVersion(connStr string) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to create request: %v", err)
 	}
-	req.Close = true
 	pass, ok := u.User.Password()
 	if ok {
-		fmt.Println("pass", pass)
 		req.SetBasicAuth(u.User.Username(), pass)
 	}
 
@@ -56,16 +53,13 @@ func DetectVersion(connStr string) (int, error) {
 func parseElasticVersion(body io.Reader) (int, error) {
 	var root elasticRootResponse
 	if err := json.NewDecoder(body).Decode(&root); err != nil {
-		fmt.Println("failed to decode json", err)
 		return 0, err
 	}
-	fmt.Println("parseElasticVersion", 61)
 
 	majorStr, _, ok := strings.Cut(root.Version.Number, ".")
 	if !ok {
 		return 0, errors.New("invalid version number")
 	}
-	fmt.Println("majorStr", majorStr)
 
 	if majorStr == "8" {
 		return 8, nil
