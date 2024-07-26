@@ -31,21 +31,22 @@ func DetectVersion(connStr string) (int, error) {
 	fmt.Println("connStr", connStr)
 	u, err := url.Parse(connStr)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to parse url: %v", err)
 	}
 
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to create request: %v", err)
 	}
 	pass, ok := u.User.Password()
 	if ok {
+		fmt.Println("pass", pass)
 		req.SetBasicAuth(u.User.Username(), pass)
 	}
 
-	resp, err := client.Get(connStr)
+	resp, err := client.Do(req)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to get response: %v", err)
 	}
 	defer resp.Body.Close()
 	return parseElasticVersion(resp.Body)
