@@ -67,7 +67,7 @@ jobs:
           TEST_TAGS: gogit
           TEST_LDAP: 1
           USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@elasticsearch:9200"
+          TEST_INDEXER_CODE_ES_URL: "https://elastic:changeme@elasticsearch:9200"
 
   test-sqlite:
     if: needs.files-changed.outputs.backend == 'true' || needs.files-changed.outputs.actions == 'true'
@@ -172,6 +172,7 @@ jobs:
         image: elasticsearch:8.14.0
         env:
           discovery.type: single-node
+          ELASTIC_PASSWORD: changeme
         ports:
           - "9200:9200"
       smtpimap:
@@ -208,7 +209,7 @@ jobs:
           TAGS: bindata
           RACE_ENABLED: true
           USE_REPO_TEST_DIR: 1
-          TEST_INDEXER_CODE_ES_URL: "http://elastic:changeme@elasticsearch:9200"
+          TEST_INDEXER_CODE_ES_URL: "https://elastic:changeme@elasticsearch:9200"
 
   test-mssql:
     if: needs.files-changed.outputs.backend == 'true' || needs.files-changed.outputs.actions == 'true'
