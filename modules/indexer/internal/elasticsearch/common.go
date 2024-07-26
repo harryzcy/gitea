@@ -4,6 +4,7 @@
 package elasticsearch
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -27,6 +28,9 @@ type elasticRootResponse struct {
 func DetectVersion(connStr string) (int, error) {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
 	}
 	u, err := url.Parse(connStr)
 	if err != nil {
