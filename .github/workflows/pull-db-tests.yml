@@ -196,7 +196,7 @@ jobs:
       # - name: run migration tests
       #   run: make test-mysql-migration
       - name: TestESIndexAndSearch
-        run: go test -timeout 30s -tags gogit -run ^TestESIndexAndSearch$ code.gitea.io/gitea/modules/indexer/code
+        run: go test -timeout 30s -tags gogit,sqlite,sqlite_unlock_notify -run ^TestESIndexAndSearch$ code.gitea.io/gitea/modules/indexer/code
         env:
           TAGS: bindata
           RACE_ENABLED: true
