@@ -5,6 +5,7 @@ package v1_27
 
 import (
 	"context"
+	"runtime/debug"
 	"slices"
 	"testing"
 
@@ -74,6 +75,9 @@ func Test_AddActionRunAttemptModel(t *testing.T) {
 	attemptTable := tableMap["action_run_attempt"]
 	require.NotNil(t, attemptTable)
 	attemptTablCols := []string{"id", "repo_id", "run_id", "attempt", "trigger_user_id", "status", "started", "stopped", "concurrency_group", "concurrency_cancel", "created", "updated"}
+	if len(attemptTable.ColumnsSeq()) != len(attemptTablCols) {
+		debug.PrintStack()
+	}
 	require.ElementsMatch(t, attemptTable.ColumnsSeq(), attemptTablCols)
 
 	runTable := tableMap["action_run"]
